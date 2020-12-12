@@ -8,25 +8,8 @@ import img_text_composition_models
 import torch
 from LSH import create_hash_table
 import time
-
-def pkl_save(path,obj):
-  with open(path, 'wb') as handle:
-      pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
-def pkl_load(path):
-  with open(path, 'rb') as handle:
-      return pickle.load(handle)
-
-class Opt:
-	def __init__(self):
-		self.dataset = "fashion200k"
-		self.dataset_path = "./dataset/Fashion200k"
-		self.batch_size = 32
-		self.embed_dim = 512
-		self.hashing = True
-
-def create_model(texts, embed_dim):
-	model = img_text_composition_models.TIRG(texts, embed_dim=embed_dim)
-	return model
+# from pkl import pkl_load, pkl_save
+from tools import opt, create_model, pkl, create_model
 
 def compute_similary_by_hasing(all_imgs_feature, queries_feature, test_queries):
 	hash_table = create_hash_table(all_imgs_feature, 10, 512)
@@ -60,31 +43,23 @@ def compute_similary_normal(all_imgs_feature, queries_feature, test_queries):
 
 if __name__ == "__main__":
 	tic = time.time()
-	opt = Opt()
-	# query_text = ["replace white with black"]
+	opt = opt.Opt()
+	model = create_model.create_model(opt).eval()
 
-	# model = create_model(query_text, opt.embed_dim)
-	# model.text_model.embedding_layer = torch.nn.Embedding(5590, 512)
-	# checkpoint = torch.load('./models/checkpoint_fashion200k.pth', \
-	# 						map_location=torch.device("cpu"))
-	# model.load_state_dict(checkpoint['model_state_dict'])
-	# model.eval()
-
-	queries_feature = pkl_load("./pkl/all_queries.pkl")
-	all_imgs_feature = pkl_load("./pkl/all_imgs.pkl")
-	all_captions = pkl_load("./pkl/all_captions.pkl")
-	img_ids = pkl_load("./pkl/img_ids.pkl")
-	mods = pkl_load("./pkl/mods.pkl")
-	# nn_result = pkl_load("./pkl/nn_result.pkl")
-	all_target_captions = pkl_load("./pkl/all_target_captions.pkl")
+	queries_feature = pkl.pkl_load("./pkl/all_queries.pkl")
+	all_imgs_feature = pkl.pkl_load("./pkl/all_imgs.pkl")
+	all_captions = pkl.pkl_load("./pkl/all_captions.pkl")
+	img_ids = pkl.pkl_load("./pkl/img_ids.pkl")
+	mods = pkl.pkl_load("./pkl/mods.pkl")
+	all_target_captions = pkl.pkl_load("./pkl/all_target_captions.pkl")
+	test_queries = pkl.pkl_load("./pkl/test_queries.pkl")
 
 	# trainset, testset = load_dataset(opt)
 	# output = test(opt, model, testset)
 
 	# test_queries = testset.get_test_queries()
 	
-
-	queries_feature = queries_feature[:5000]
+	queries_feature = queries_feature[:1000]
 	# feature normalization
 	for i in range(queries_feature.shape[0]):
 		queries_feature[i, :] /= np.linalg.norm(queries_feature[i, :])
@@ -93,14 +68,13 @@ if __name__ == "__main__":
 		all_imgs_feature[i, :] /= np.linalg.norm(all_imgs_feature[i, :])
 
 	# match test queries to target images, get nearest neighbors
-	test_queries = pkl_load("./pkl/test_queries.pkl")
 	if opt.hashing:
 		sims = compute_similary_by_hasing(all_imgs_feature, queries_feature, test_queries)
 	else:
 		sims = compute_similary_normal(all_imgs_feature, queries_feature, test_queries)
 	
 	nn_result = [np.argsort(-sims[i, :])[:110] for i in range(sims.shape[0])]
-	# # pkl_save("./pkl/nn_result.pkl", nn_result)
+
 	# compute recalls
 	out = []
 	nn_result = [[all_captions[nn] for nn in nns] for nns in nn_result]

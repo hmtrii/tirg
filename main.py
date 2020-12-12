@@ -52,6 +52,7 @@ def parse_opt():
   parser.add_argument('--num_iters', type=int, default=210000)
   parser.add_argument('--loss', type=str, default='soft_triplet')
   parser.add_argument('--loader_num_workers', type=int, default=4)
+  parser.add_argument('--pretrained_model',type=str, default=None)
   args = parser.parse_args()
   return args
 
@@ -171,6 +172,15 @@ def create_model_and_optimizer(opt, texts):
               p2['params'][j] = torch.tensor(0.0, requires_grad=True)
   optimizer = torch.optim.SGD(
       params, lr=opt.learning_rate, momentum=0.9, weight_decay=opt.weight_decay)
+
+  if opt.pretrained_model:
+    print("Load checkpoint from {}".format(opt.pretrained_model))
+    checkpoint = torch.load(opt.pretrained_model)
+    if torch.cuda.is_available():
+      model.load_state_dict(checkpoint['model_state_dict'])
+    else:
+      model.load_state_dict(checkpoint['model_state_dict'], map_location=torch.device("cpu"))
+      
   return model, optimizer
 
 
