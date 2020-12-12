@@ -1,0 +1,79 @@
+import numpy as np
+import pickle
+
+
+def pkl_save(path,obj):
+  with open(path, 'wb') as handle:
+      pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def pkl_load(path):
+  with open(path, 'rb') as handle:
+      return pickle.load(handle)
+
+
+class HashTable:
+    def __init__(self, hash_size, inp_dimensions):
+        self.hash_size = hash_size
+        self.inp_dimensions = inp_dimensions
+        self.hash_table = dict()
+        np.random.seed(0)
+        self.projections = np.random.randn(self.hash_size, inp_dimensions)
+        
+    def generate_hash(self, inp_vector):
+        bools = (np.dot(inp_vector, self.projections.T) > 0).astype('int')
+        return ''.join(bools.astype('str'))
+
+    def __setitem__(self, inp_vec, label):
+        hash_value = self.generate_hash(inp_vec)
+        self.hash_table[hash_value] = self.hash_table\
+            .get(hash_value, list()) + [label]
+        
+    def __getitem__(self, inp_vec):
+        hash_value = self.generate_hash(inp_vec)
+        return self.hash_table.get(hash_value, [])
+        # return self.hash_table[hash_value]
+
+class LSH:
+    def __init__(self, num_tables, hash_size, inp_dimensions):
+        self.num_tables = num_tables
+        self.hash_size = hash_size
+        self.inp_dimensions = inp_dimensions
+        self.hash_tables = list()
+        for i in range(self.num_tables):
+            self.hash_tables.append(HashTable(self.hash_size, self.inp_dimensions))
+    
+    def __setitem__(self, inp_vec, label):
+        for table in self.hash_tables:
+            table[inp_vec] = label
+    
+    def __getitem__(self, inp_vec):
+        results = list()
+        for table in self.hash_tables:
+            results.extend(table[inp_vec])
+        return list(set(results))
+
+
+def create_hash_table(matrix, hash_size, inp_dimensions):
+    """matrix: contain all vectors"""
+    hash_table = HashTable(hash_size=hash_size, inp_dimensions=inp_dimensions)
+    for i in range(matrix.shape[0]):
+        hash_table.__setitem__(matrix[i, :], i)
+    return hash_table
+
+
+
+# np.random.seed(0)
+# all_imgs_feature = pkl_load("./pkl/all_imgs_feature.pkl")
+# hash_table = HashTable(hash_size=4, inp_dimensions=512)
+# for i in range(all_imgs_feature.shape[0]):
+#     hash_table.__setitem__(all_imgs_feature[i,:], i+1)
+# print(hash_table.hash_table['1111'])
+# hash_table = create_hash_table(all_imgs_feature, 4, 512)
+
+# print(hash_table.hash_table['0000'])
+# b = np.random.randint(0, 2, 20)
+# print(hash_table.__getitem__(b))
+# lsh = LSH()
+# print(hash_table.projections)
+
+

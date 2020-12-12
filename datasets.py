@@ -303,7 +303,7 @@ class Fashion200k(BaseDataset):
           caption2imgids[c] = []
         caption2imgids[c].append(i)
     self.caption2imgids = caption2imgids
-    print(len(caption2imgids), 'unique cations')
+    print(len(caption2imgids), 'unique captions')
 
     # parent captions are 1-word shorter than their children
     parent2children_captions = {}
