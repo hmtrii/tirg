@@ -53,7 +53,7 @@ if __name__ == "__main__":
 	mods = pkl.pkl_load("./pkl/mods.pkl")
 	all_target_captions = pkl.pkl_load("./pkl/all_target_captions.pkl")
 	test_queries = pkl.pkl_load("./pkl/test_queries.pkl")
-
+	
 	# trainset, testset = load_dataset(opt)
 	# output = test(opt, model, testset)
 

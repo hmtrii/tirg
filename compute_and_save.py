@@ -93,18 +93,8 @@ def save_normalize_all_imgs_feature():
 if __name__ == "__main__":
     opt = opt.Opt()
     trainset, testset = load_dataset(opt)
-    # model = create_model.create_model(opt)
-    # model.eval()
-    # print(testset.get_test_queries()[2000])
-    # testset.get_img(108, raw_img=True).show()
-    # save_info_test_queries(opt, testset)
-    # save_test_queries_feature(opt, model)
-    # save_all_imgs_feature(opt, testset)
-    # save_normalize_all_imgs_feature()
 
-
-    
-    n = 2165
+    n = np.random.ranint(0,10000)
     all_captions = pkl.pkl_load("./pkl/all_captions.pkl")
     img_ids = pkl.pkl_load("./pkl/img_ids.pkl")
     mods = pkl.pkl_load("./pkl/mods.pkl")

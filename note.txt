@@ -1,6 +1,0 @@
-Giam bot data
-
-Tinh feature image toan bo dataset:
-    luu file
-
-Tinh feature cho 1 query bat ki
