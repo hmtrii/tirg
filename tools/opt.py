@@ -4,5 +4,5 @@ class Opt:
 		self.dataset_path = "./dataset/Fashion200k"
 		self.batch_size = 32
 		self.embed_dim = 512
-		self.hashing = True
-		self.retrieve_by_random = False
+		self.hashing = False
+		self.retrieve_by_random = True

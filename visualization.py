@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
 	# test_queries = testset.get_test_queries()
 	
-	queries_feature = queries_feature[:1000]
+	queries_feature = queries_feature[:5000]
 	# feature normalization
 	for i in range(queries_feature.shape[0]):
 		queries_feature[i, :] /= np.linalg.norm(queries_feature[i, :])

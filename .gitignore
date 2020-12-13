@@ -141,6 +141,5 @@ cython_debug/
 # My file
 runs/
 dataset/
-test.py
 models/
 pkl/

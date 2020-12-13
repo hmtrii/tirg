@@ -129,3 +129,6 @@ class TextLSTMModel(torch.nn.Module):
       first_hidden = (first_hidden[0].cpu(), first_hidden[1].cpu())
     lstm_output, last_hidden = self.lstm(etexts, first_hidden)
     return lstm_output, last_hidden
+
+  def get_vocab(self):
+    return self.vocab

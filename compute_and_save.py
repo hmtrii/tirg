@@ -6,14 +6,14 @@ import datasets
 from main import load_dataset
 from tools import opt, create_model, pkl
 import PIL
+import text_model
 
 def save_info_test_queries(opt, testset):
     test_queries = testset.get_test_queries()
     pkl.pkl_save("./pkl/test_queries.pkl", test_queries)
     print("Test queries information are saved at pkl/test_quriese.pkl")
     
-
-def save_test_queries_feature(opt, model):
+def save_test_queries_feature(opt, model, testset):
     test_queries = pkl.pkl_load("./pkl/test_queries.pkl")
     # compute test query features
     imgs = []
@@ -89,25 +89,36 @@ def save_normalize_all_imgs_feature():
 
     pkl.pkl_save("./pkl/normalized_all_imgs_feature.pkl", all_imgs_feature)
 
+def save_vocab(opt, trainset):
+    vocab = text_model.SimpleVocab()
+    for t in trainset.get_all_texts():
+        vocab.add_text_to_vocab(t)
+    pkl.pkl_save("./pkl/vocab.pkl", vocab)
+
 
 if __name__ == "__main__":
     opt = opt.Opt()
+    # model = create_model.create_model(opt)
     trainset, testset = load_dataset(opt)
 
-    n = np.random.ranint(0,10000)
+    # vocab = pkl.pkl_load("./pkl/vocab.pkl")
+    # print(vocab.word2id)
+    # save_test_queries_feature(opt, model, testset)
+    
     all_captions = pkl.pkl_load("./pkl/all_captions.pkl")
     img_ids = pkl.pkl_load("./pkl/img_ids.pkl")
     mods = pkl.pkl_load("./pkl/mods.pkl")
     all_target_captions = pkl.pkl_load("./pkl/all_target_captions.pkl")
     test_queries = pkl.pkl_load("./pkl/test_queries.pkl")
-    
 
-    print(testset.get_test_queries()[n])
+
+    n = 1332
     print(test_queries[n])
     print(img_ids[n])
+    print(all_target_captions[n])
     print(mods[n])
-    print(testset.imgs[img_ids[n]]['file_path'])
-    print(all_captions[img_ids[n]])
-    img = testset.get_img(img_ids[n], raw_img=True)
+    idx = img_ids[n]
+    img = testset.get_img(idx, raw_img=True)
+    print(testset.imgs[idx]['file_path'])
+    print(all_captions[idx])
     img.show()
-    # print(img_ids[:100])
