@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
 	# test_queries = testset.get_test_queries()
 	
-	queries_feature = queries_feature[:5000]
+	queries_feature = queries_feature[:3000]
 	# feature normalization
 	for i in range(queries_feature.shape[0]):
 		queries_feature[i, :] /= np.linalg.norm(queries_feature[i, :])
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 	else:
 		sims = compute_similary_normal(all_imgs_feature, queries_feature, test_queries)
 	
-	nn_result = [np.argsort(-sims[i, :])[:110] for i in range(sims.shape[0])]
+	nn_result = [np.argsort(-sims[i, :])[:100] for i in range(sims.shape[0])]
 
 	# compute recalls
 	out = []
