@@ -101,7 +101,26 @@ if __name__ == "__main__":
     # model = create_model.create_model(opt)
     trainset, testset = load_dataset(opt)
 
-    print(trainset.__getitem__(100))
+    trainloader = trainset.get_loader(
+        batch_size=opt.batch_size,
+        shuffle=True,
+        drop_last=True,
+        num_workers=4)
+    
+    for data in trainloader:
+        print(data[0])
+        s = trainset.get_img(data[0]['source_img_id'], raw_img=True)
+        t =trainset.get_img(data[0]['target_img_id'], raw_img=True)
+        import matplotlib.pyplot as plt
+        fig = plt.figure(figsize=(6, 6))
+        fig.add_subplot(3, 5, 3)
+        plt.imshow(s)
+        fig.add_subplot(3, 5, 8)
+        plt.imshow(t)
+        # img.show()
+        plt.show()
+        break
+
 
     # n = np.random.randint(1000)
     # a = testset.get_test_queries()[n]
@@ -111,14 +130,7 @@ if __name__ == "__main__":
     # source = testset.get_img(a['source_img_id'], raw_img=True)
     # target = testset.get_img(a['target_img_id'], raw_img=True)
     
-    # import matplotlib.pyplot as plt
-    # fig = plt.figure(figsize=(6, 6))
-    # fig.add_subplot(3, 5, 3)
-    # plt.imshow(source)
-    # fig.add_subplot(3, 5, 8)
-    # plt.imshow(target)
-    # # img.show()
-    # plt.show()
+    
 
 
 

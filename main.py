@@ -169,7 +169,9 @@ def create_model_and_optimizer(opt, texts):
     print('Invalid model', opt.model)
     print('available: imgonly, textonly, concat, tirg or tirg_lastconv')
     sys.exit()
-  model = model.cuda()
+
+  if torch.cuda.is_available():
+    model = model.cuda()
 
   # create optimizer
   params = []
@@ -226,7 +228,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     logger.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], it)
 
     # test
-    if epoch % 3 == 1:
+    if epoch % 1 == 0:
       tests = []
       for name, dataset in [('train', trainset), ('test', testset)]:
         t = test_retrieval.test(opt, model, dataset)
@@ -257,10 +259,20 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
       assert type(data) is list
       img1 = np.stack([d['source_img_data'] for d in data])
       img1 = torch.from_numpy(img1).float()
-      img1 = torch.autograd.Variable(img1).cuda()
+
+      if torch.cuda.is_available():
+        img1 = torch.autograd.Variable(img1).cuda()
+      else:
+        img1 = torch.autograd.Variable(img1)
+
       img2 = np.stack([d['target_img_data'] for d in data])
       img2 = torch.from_numpy(img2).float()
-      img2 = torch.autograd.Variable(img2).cuda()
+
+      if torch.cuda.is_available():
+        img2 = torch.autograd.Variable(img2).cuda()
+      else:
+        img2 = torch.autograd.Variable(img2)
+
       mods = [str(d['mod']['str']) for d in data]
     #   mods = [t.decode('utf-8') for t in mods]
       mods = [t for t in mods]
