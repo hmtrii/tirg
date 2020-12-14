@@ -645,7 +645,9 @@ class FurnitureStyle(BaseDataset):
         id2caption = {}
         caption2imgids = {}
         for i, img in enumerate(self.imgs):
-            for c in img['captions']:
+            tmp = ' '.join([w for w in img['captions']])
+            tmp = tmp.replace('  ', ' ')
+            for c in [tmp]:
                 if not c in caption2id:
                     id2caption[len(caption2id)] = c
                     caption2id[c] = len(caption2id)
@@ -696,8 +698,8 @@ class FurnitureStyle(BaseDataset):
         target_idx = random.choice(self.caption2imgids[c])
 
         # find the word difference between query and target (not in parent caption)
-        source_caption = self.imgs[idx]['captions'][0]
-        target_caption = self.imgs[target_idx]['captions'][0]
+        source_caption = self.imgs[idx]['captions']#[0]
+        target_caption = self.imgs[target_idx]['captions']#[0]
         source_word, target_word, mod_str = self.get_different_word(
             source_caption, target_caption)
         return idx, target_idx, source_word, target_word, mod_str
@@ -718,10 +720,10 @@ class FurnitureStyle(BaseDataset):
         out = {}
         out['source_img_id'] = idx
         out['source_img_data'] = self.get_img(idx)
-        out['source_caption'] = self.imgs[idx]['captions'][0]
+        out['source_caption'] = self.imgs[idx]['captions']#[0]
         out['target_img_id'] = target_idx
         out['target_img_data'] = self.get_img(target_idx)
-        out['target_caption'] = self.imgs[target_idx]['captions'][0]
+        out['target_caption'] = self.imgs[target_idx]['captions']#[0]
         out['mod'] = {'str': mod_str}
         return out
 
