@@ -47,7 +47,7 @@ if __name__ == "__main__":
 	model = create_model.create_model(opt).eval()
 
 	queries_feature = pkl.pkl_load("./pkl/all_queries.pkl")
-	all_imgs_feature = pkl.pkl_load("./pkl/all_imgs.pkl")
+	all_imgs_feature = pkl.pkl_load("./pkl/normalized_all_imgs_feature.pkl")
 	all_captions = pkl.pkl_load("./pkl/all_captions.pkl")
 	img_ids = pkl.pkl_load("./pkl/img_ids.pkl")
 	mods = pkl.pkl_load("./pkl/mods.pkl")
@@ -64,8 +64,9 @@ if __name__ == "__main__":
 	for i in range(queries_feature.shape[0]):
 		queries_feature[i, :] /= np.linalg.norm(queries_feature[i, :])
 
-	for i in range(all_imgs_feature.shape[0]):
-		all_imgs_feature[i, :] /= np.linalg.norm(all_imgs_feature[i, :])
+	# for i in range(all_imgs_feature.shape[0]):
+	# 	all_imgs_feature[i, :] /= np.linalg.norm(all_imgs_feature[i, :])
+	
 
 	# match test queries to target images, get nearest neighbors
 	if opt.hashing:

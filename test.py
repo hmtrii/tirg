@@ -14,11 +14,10 @@ from LSH import create_hash_table
 from tools import pkl, opt, create_model
 
 def retriveve_custom_query(query_img_raw, query_text, query_feature, spatial_search, testset, model):
-	spatial_search = np.array(spatial_search)
 	# Normalize feature
 	query_feature[0, :] /= np.linalg.norm(query_feature[0,:])
 
-	spatial_search = pkl.pkl_load("./pkl/normalized_all_imgs_feature.pkl")
+	# spatial_search = pkl.pkl_load("./pkl/normalized_all_imgs_feature.pkl")
 
 	sims = query_feature.dot(spatial_search.T)
 	nn_result = np.argsort(-sims[0, :])[:50]
@@ -63,7 +62,7 @@ def create_custom_query_feature(model):
 	return query_img_raw, query_text, query_feature
 
 def retrieve_random_query_from_testset(testset):
-	queries_feature = pkl.pkl_load("./pkl/all_queries.pkl")[10000:12000]
+	queries_feature = pkl.pkl_load("./pkl/all_queries.pkl")[0:2000]
 	for i in range(queries_feature.shape[0]):
 		queries_feature[i, :] /= np.linalg.norm(queries_feature[i, :])
 
@@ -116,13 +115,16 @@ if __name__ == "__main__":
 		retrieve_random_query_from_testset(testset)
 	else:
 		query_img_raw, query_text, query_feature = create_custom_query_feature(model)
-		all_imgs_feature = pkl.pkl_load("./pkl/all_imgs.pkl")
+		# all_imgs_feature = pkl.pkl_load("./pkl/all_imgs.pkl")
 		if opt.hashing:
+			all_imgs_feature = pkl.pkl_load("./pkl/all_imgs.pkl")
 			hash_table = create_hash_table(all_imgs_feature, 4, 512)
 			spatial_search = hash_table.__getitem__(query_feature[0])
+			for i in range(spatial_search.shape[0]):
+				spatial_search[i, :] /= np.linalg.norm(spatial_search[i, :])
 		else:
-			spatial_search = all_imgs_feature
-		retriveve_custom_query(query_img_raw, query_text, query_feature, all_imgs_feature, testset, model)
+			spatial_search = pkl.pkl_load("./pkl/normalized_all_imgs_feature.pkl")
+		retriveve_custom_query(query_img_raw, query_text, query_feature, spatial_search, testset, model)
 	
 	
 

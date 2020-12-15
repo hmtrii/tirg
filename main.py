@@ -218,7 +218,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     epoch += 1
 
     # show/log stats
-    print('It', it, 'epoch', epoch, 'Elapsed time', round(time.time() - tic,
+    print('It: ', it, ', epoch: ', epoch, ', Elapsed time: ', round(time.time() - tic,
                                                           4), opt.comment)
     tic = time.time()
     for loss_name in losses_tracking:
@@ -228,7 +228,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     logger.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], it)
 
     # test
-    if epoch % 1 == 0:
+    if epoch % 1 == 0 and epoch != 0:
       tests = []
       for name, dataset in [('train', trainset), ('test', testset)]:
         t = test_retrieval.test(opt, model, dataset)

@@ -7,6 +7,8 @@ from main import load_dataset
 from tools import opt, create_model, pkl
 import PIL
 import text_model
+from main import create_model_and_optimizer
+from test_retrieval import test
 
 def save_info_test_queries(opt, testset):
     test_queries = testset.get_test_queries()
@@ -98,28 +100,12 @@ def save_vocab(opt, trainset):
 
 if __name__ == "__main__":
     opt = opt.Opt()
-    # model = create_model.create_model(opt)
     trainset, testset = load_dataset(opt)
-
-    trainloader = trainset.get_loader(
-        batch_size=opt.batch_size,
-        shuffle=True,
-        drop_last=True,
-        num_workers=4)
+    a
+    model, _ = create_model_and_optimizer(opt, [t for t in trainset.get_all_texts()])
     
-    for data in trainloader:
-        print(data[0])
-        s = trainset.get_img(data[0]['source_img_id'], raw_img=True)
-        t =trainset.get_img(data[0]['target_img_id'], raw_img=True)
-        import matplotlib.pyplot as plt
-        fig = plt.figure(figsize=(6, 6))
-        fig.add_subplot(3, 5, 3)
-        plt.imshow(s)
-        fig.add_subplot(3, 5, 8)
-        plt.imshow(t)
-        # img.show()
-        plt.show()
-        break
+    out = test(opt, model, testset)
+    print(out)
 
 
     # n = np.random.randint(1000)
