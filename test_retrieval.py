@@ -86,7 +86,7 @@ def test(opt, model, testset):
         imgs = torch.stack(imgs).float()
         imgs = torch.autograd.Variable(imgs)
         mods = [t for t in mods]
-        if torch.cuda.is_available:
+        if torch.cuda.is_available():
           f = model.compose_img_text(imgs.cuda(), mods).data.cpu().numpy()
         else:
           f = model.compose_img_text(imgs, mods).data.cpu().numpy()
@@ -97,7 +97,7 @@ def test(opt, model, testset):
       if len(imgs0) > opt.batch_size or i == 9999:
         imgs0 = torch.stack(imgs0).float()
         imgs0 = torch.autograd.Variable(imgs0)
-        if torch.cuda.is_available:
+        if torch.cuda.is_available():
           imgs0 = model.extract_img_feature(imgs0.cuda()).data.cpu().numpy()
         else:
           imgs0 = model.extract_img_feature(imgs0).data.cpu().numpy()

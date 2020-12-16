@@ -103,7 +103,7 @@ def retrieve_random_query_from_testset(testset):
 		img = testset.get_img(int(idx), raw_img=True)
 		plt.imshow(img)
 		
-		if idx == all_target_captions[chosen_idx]:
+		if idx == all_target_captions[chosen_idx]:	
 			plt.title("GT")
 	plt.show()
 	

@@ -228,7 +228,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     logger.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], it)
 
     # test
-    if epoch % 1 == 0 and epoch != 0:
+    if epoch % 3 == 1:
       tests = []
       for name, dataset in [('train', trainset), ('test', testset)]:
         t = test_retrieval.test(opt, model, dataset)

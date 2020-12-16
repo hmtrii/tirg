@@ -101,8 +101,10 @@ def save_vocab(opt, trainset):
 if __name__ == "__main__":
     opt = opt.Opt()
     trainset, testset = load_dataset(opt)
+    print(testset.get_test_queries()[0])
     a
     model, _ = create_model_and_optimizer(opt, [t for t in trainset.get_all_texts()])
+    model.eval()
     
     out = test(opt, model, testset)
     print(out)
