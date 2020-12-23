@@ -1,110 +1,41 @@
 # Composing Text and Image for Image Retrieval
+Project at Multimedia Information Retrieval Course
 
-This is the code for the paper:
+# Introduction
+Our project is an attempt to use TIRG method with Fashion200k dataset.
 
-**<a href="https://arxiv.org/abs/1812.07119">Composing Text and Image for Image Retrieval - An Empirical Odyssey
-</a>**
-<br>
-Nam Vo, Lu Jiang, Chen Sun, Kevin Murphy, Li-Jia Li, Li Fei-Fei, James Hays
-<br>
-CVPR 2019.
+This repository is forked from [TIRG](https://github.com/google/tirg).
 
+We have added LSH(Locality Sensitive Hashing) to impove speed retrieval.
 
-*Please note that this is not an officially supported Google product.* And *this is the reproduced, not the original code.*
+[Presetation](https://docs.google.com/presentation/d/1Ga_terlOKyy3bl4hNvTKnTnNhqMD2kNOieVN40JrBqQ/edit#slide=id.gb1a04fa9d2_1_28)
 
-If you find this code useful in your research then please cite
-
-```
-@inproceedings{vo2019composing,
-  title={Composing Text and Image for Image Retrieval-An Empirical Odyssey},
-  author={Vo, Nam and Jiang, Lu and Sun, Chen and Murphy, Kevin and Li, Li-Jia and Fei-Fei, Li and Hays, James},
-  booktitle={CVPR},
-  year={2019}
-}
-```
-
-## Introduction
-In this paper, we study the task of image retrieval, where the input query is
-specified in the form of an image plus some text that describes desired
-modifications to the input image.
-
-![Problem Overview](images/intro.png)
-
-
-We propose a new way to combine image and
-text using TIRG function for the retrieval task. We show this outperforms
-existing approaches on different datasets.
-
-![Method](images/newpipeline.png)
-
+# Implementation
 
 ## Setup
-
-- torchvision
-- pytorch
-- numpy
-- tqdm
+- pytorch==1.2.0
+- torchvision==0.4.0
+- Pillow=5.2.0
 - tensorboardX
 
-## Running Models
+## Decription code
+Almost code is based on [TIRG](https://github.com/google/tirg).
 
-- `main.py`: driver script to run training/testing
-- `datasets.py`: Dataset classes for loading images & generate training retrieval queries
-- `text_model.py`: LSTM model to extract text features
-- `img_text_composition_models.py`: various image text compostion models (described in the paper)
-- `torch_function.py`: contains soft triplet loss function and feature normalization function
-- `test_retrieval.py`: functions to perform retrieval test and compute recall performance
+Our code:
 
+- `Compute_recall.ipynb`: Compute recall when apply LSH and no LSH. Then compare result. 
 
-### CSS3D dataset
+- `Train.ipynb`: Continuous training pretrained model from [TIRG](https://github.com/google/tirg). 
+    - [TIRG's pretrained model](https://storage.googleapis.com/image_retrieval_css/pretrained_models/checkpoint_fashion200k.pth).
+    - [Our model](https://drive.google.com/file/d/1-JphJLv9lTLr9MC3KyMBVM4NlI-ybSWW/view?usp=sharing)
 
-Download the dataset from this [external website](https://drive.google.com/file/d/1wPqMw-HKmXUG2qTgYBiTNUnjz83hA2tY/view?usp=sharing).
+- `Retrieve_example.ipynb`: Retrieve an example query.
 
-Make sure the dataset include these files:
-`<dataset_path>/css_toy_dataset_novel2_small.dup.npy`
-`<dataset_path>/images/*.png`
+- `LSH.py`: LSH class to create hash table, compute hash value.
 
-To run our training & testing:
+- `compute_and_save.py`: Pre-compute all features vector for convinient and speed up retrieval.
 
-```
-python main.py --dataset=css3d --dataset_path=./CSSDataset --num_iters=160000 \
-  --model=tirg --loss=soft_triplet --comment=css3d_tirg
-
-python main.py --dataset=css3d --dataset_path=./CSSDataset --num_iters=160000 \
-  --model=tirg_lastconv --loss=soft_triplet --comment=css3d_tirgconv
-```
-
-The first command apply TIRG to the fully connected layer and the second applies it to the last conv layer.
-To run the baseline:
-
-```
-python main.py --dataset=css3d --dataset_path=./CSSDataset --num_iters=160000 \
-  --model=concat --loss=soft_triplet --comment=css3d_concat
-```
-
-
-### MITStates dataset
-Download the dataset from this [external website](http://web.mit.edu/phillipi/Public/states_and_transformations/index.html).
-
-Make sure the dataset include these files:
-
-`<dataset_path>/images/<adj noun>/*.jpg`
-
-For training & testing:
-
-```
-python main.py --dataset=mitstates --dataset_path=./mitstates \
-  --num_iters=160000 --model=concat --loss=soft_triplet \
-  --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 \
-  --comment=mitstates_concat
-
-python main.py --dataset=mitstates --dataset_path=./mitstates \
-  --num_iters=160000 --model=tirg --loss=soft_triplet \
-  --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 \
-  --comment=mitstates_tirg
-```
-
-### Fashion200k dataset
+## Dataset: Fashion200k dataset
 Download the dataset from this [external website](https://github.com/xthan/fashion-200k) Download our generated test_queries.txt from [here](https://storage.googleapis.com/image_retrieval_css/test_queries.txt).
 
 Make sure the dataset include these files:
@@ -114,35 +45,27 @@ Make sure the dataset include these files:
 <dataset_path>/women/<category>/<caption>/<id>/*.jpeg
 <dataset_path>/test_queries.txt`
 ```
-
 Run training & testing:
 
 ```
 python main.py --dataset=fashion200k --dataset_path=./Fashion200k \
-  --num_iters=160000 --model=concat --loss=batch_based_classification \
+  --num_iters=160000 --model=concat --loss=soft_triplet \
   --learning_rate_decay_frequency=50000 --comment=f200k_concat
 
 python main.py --dataset=fashion200k --dataset_path=./Fashion200k \
-  --num_iters=160000 --model=tirg --loss=batch_based_classification \
+  --num_iters=160000 --model=tirg --loss=soft_triplet \
   --learning_rate_decay_frequency=50000 --comment=f200k_tirg
 ```
 
+## LSH (Locality Sensitive Hashing)
+- We implement LSH follow this [link](https://towardsdatascience.com/locality-sensitive-hashing-for-music-search-f2f1940ace23)
 
-## Pretrained Models:
+- All images feature in database are hashing into 100 spatial search.
 
-Our pretrained models can be downloaded below. You can find our best single model accuracy:
-*The numbers are slightly different from the ones reported in the paper due to the re-implementation.*
+- Compare result when retrieve random 5000 queries over 5 times:
 
-- [CSS Model](https://storage.googleapis.com/image_retrieval_css/pretrained_models/checkpoint_css3d.pth): 0.760
-- [Fashion200k Model](https://storage.googleapis.com/image_retrieval_css/pretrained_models/checkpoint_fashion200k.pth): 0.161
-- [MITStates Model](https://storage.googleapis.com/image_retrieval_css/pretrained_models/checkpoint_mitstates.pth): 0.132
+![Compare result](images/compare_result.png)
 
+## Retrieve an example
 
-
-## Notes:
-All log files will be saved at `./runs/<timestamp><comment>`.
-Monitor with tensorboard (training loss, training retrieval performance, testing retrieval performance):
-
-```tensorboard --logdir ./runs/ --port 8888```
-
-Pytorch's data loader might consume a lot of memory, if that's an issue add `--loader_num_workers=0` to disable loading data in parallel.
+![Example](images/retrieve_example.png)
