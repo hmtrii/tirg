@@ -116,6 +116,7 @@ def test(opt, model, testset):
 
   # match test queries to target images, get nearest neighbors
   sims = all_queries[:3000].dot(all_imgs.T)
+  
   if test_queries:
     for i, t in enumerate(test_queries):
       try:
