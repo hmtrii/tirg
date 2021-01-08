@@ -115,10 +115,13 @@ def test(opt, model, testset):
     all_imgs[i, :] /= np.linalg.norm(all_imgs[i, :])
 
   # match test queries to target images, get nearest neighbors
-  sims = all_queries.dot(all_imgs.T)
+  sims = all_queries[:3000].dot(all_imgs.T)
   if test_queries:
     for i, t in enumerate(test_queries):
-      sims[i, t['source_img_id']] = -10e10  # remove query image
+      try:
+        sims[i, t['source_img_id']] = -10e10  # remove query image
+      except:
+        pass
   nn_result = [np.argsort(-sims[i, :])[:110] for i in range(sims.shape[0])]
 
   # compute recalls
