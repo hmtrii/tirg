@@ -235,7 +235,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
       # avg_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
       print('    Loss', loss_name, round(avg_loss, 4))
 
-    logger.add_scalar("Loss_tracking", {'traing_loss': train_loss,
+    logger.add_scalars("Loss_tracking", {'traing_loss': train_loss,
                                         'test_loss': test_loss}, it)
     logger.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], it)
 
@@ -272,12 +272,6 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
         num_workers=opt.loader_num_workers
     )
     
-    testloader = testset.get_loader(
-        batch_size=opt.batch_size,
-        shuffle=True,
-        drop_last=True,
-        num_workers=opt.load_num_worers
-    )
 
     def training_1_iter(data):
       assert type(data) is list
@@ -334,27 +328,16 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
       total_loss.backward()
       optimizer.step()
 
-    def compute_loss_testset(data):
-      assert type(data) is list
-      img1 = np.stack([d['source_img_data'] for d in data])
-      img1 = torch.from_numpy(img1).float()
-
+    def compute_loss_testset(t):
+      img1 = [testset.get_img(t['source_img_id'])]
+      mod = [t['mod']['str']]
+      img2 = [testset.get_img(t['target_img_id'])]
       if torch.cuda.is_available():
         img1 = torch.autograd.Variable(img1).cuda()
-      else:
-        img1 = torch.autograd.Variable(img1)
-
-      img2 = np.stack([d['target_img_data'] for d in data])
-      img2 = torch.from_numpy(img2).float()
-
-      if torch.cuda.is_available():
         img2 = torch.autograd.Variable(img2).cuda()
       else:
-        img2 = torch.autograd.Variable(img2)
-      
-      mods = [str(d['mod']['str']) for d in data]
-      # mods = [t.decode('utf-8') for t in mods]
-      mods = [t for t in mods]
+        img1 = torch.autograd.Variable(img1).cpu()
+        img2 = torch.autograd.Variable(img2).cpu()
 
       # compute loss
       losses = []
@@ -377,7 +360,6 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
           losses_tracking[loss_name] = []
         losses_tracking[loss_name].append(float(loss_value))
       
-
     for data in tqdm(trainloader, desc='Training for epoch ' + str(epoch)):
       it += 1
       training_1_iter(data)
@@ -389,6 +371,9 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     
     for data in tqdm(testloader, desc='Testing for epoch ' + str(epoch)):
       compute_loss_testset(data)
+    
+    for t in tqdm(testset.get_test_queries()[:3000], decs='Testing for epoch ' + str(epoch)):
+      compute_loss_testset(t)
 
   print('Finished training')
 
