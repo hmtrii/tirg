@@ -369,9 +369,6 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
         for g in optimizer.param_groups:
           g['lr'] *= 0.1
     
-    for data in tqdm(testloader, desc='Testing for epoch ' + str(epoch)):
-      compute_loss_testset(data)
-    
     for t in tqdm(testset.get_test_queries()[:3000], decs='Testing for epoch ' + str(epoch)):
       compute_loss_testset(t)
 
