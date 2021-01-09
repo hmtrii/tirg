@@ -224,20 +224,25 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     tic = time.time()
     train_loss = 0
     test_loss = 0
+    best_test_loss = 9999
+    count_early_stopping = 0
     total_training_loss = 0
     for loss_name in losses_tracking:
       if loss_name == "soft_triplet":
         train_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
-      elif loss_name == "soft_triple on testset":
-        test_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
+        print('    Loss', loss_name, round(train_loss, 4))
+      elif loss_name == "soft_triplet on testset":
+        test_loss = np.mean(losses_tracking[loss_name])
+        print('    Loss', loss_name, round(test_loss, 4))
       elif loss_name == "total training loss":
         total_training_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
+        print('    Loss', loss_name, round(total_training_loss, 4))
       # avg_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
-      print('    Loss', loss_name, round(avg_loss, 4))
-
-    logger.add_scalars("Loss_tracking", {'traing_loss': train_loss,
-                                        'test_loss': test_loss}, it)
-    logger.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], it)
+      # print('    Loss', loss_name, round(avg_loss, 4))
+    if epoch != 0:
+      logger.add_scalars("Loss_tracking", {'traing_loss': train_loss,
+                                          'test_loss': test_loss}, it)
+      logger.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], it)
 
     # for loss_name in losses_test_tracking:
     #   avg_loss = np.mean(losses_test_tracking[loss_name][-len(test)])
@@ -262,6 +267,21 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
         'model_state_dict': model.state_dict(),
     },
                logger.file_writer.get_logdir() + '/latest_checkpoint.pth')
+
+    if test_loss < best_test_loss and epoch != 0:
+      torch.save({
+          'it': it,
+          'opt': opt,
+          'model_state_dict': model.state_dict(),
+      },
+                  logger.file_writer.get_logdir() + '/best_checkpoint.pth')
+      count_early_stopping = 0
+    else:
+      count_early_stopping += 1
+    
+    if count_early_stopping >= 3:
+      print("Eearly stopping")
+      break
 
     # run trainning for 1 epoch
     model.train()
