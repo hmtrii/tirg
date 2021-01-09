@@ -211,6 +211,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
   """Function for train loop"""
   print('Begin training')
   losses_tracking = {}
+  # losses_test_tracking = {}
   it = 0
   epoch = -1
   tic = time.time()
@@ -221,11 +222,27 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     print('It: ', it, ', epoch: ', epoch, ', Elapsed time: ', round(time.time() - tic,
                                                           4), opt.comment)
     tic = time.time()
+    train_loss = 0
+    test_loss = 0
+    total_training_loss = 0
     for loss_name in losses_tracking:
-      avg_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
+      if loss_name == "soft_triplet":
+        train_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
+      elif loss_name == "soft_triple on testset":
+        test_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
+      elif loss_name == "total training loss":
+        total_training_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
+      # avg_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
       print('    Loss', loss_name, round(avg_loss, 4))
-      logger.add_scalar(loss_name, avg_loss, it)
+
+    logger.add_scalar("Loss_tracking", {'traing_loss': train_loss,
+                                        'test_loss': test_loss}, it)
     logger.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], it)
+
+    # for loss_name in losses_test_tracking:
+    #   avg_loss = np.mean(losses_test_tracking[loss_name][-len(test)])
+    #   print('    Loss', loss_name, round(avg_loss, 4))
+    #   logger.add_scalar(loss_name, avg_loss, it)
 
     # test
     if epoch % 3 == 1:
@@ -252,8 +269,15 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
         batch_size=opt.batch_size,
         shuffle=True,
         drop_last=True,
-        num_workers=opt.loader_num_workers)
-
+        num_workers=opt.loader_num_workers
+    )
+    
+    testloader = testset.get_loader(
+        batch_size=opt.batch_size,
+        shuffle=True,
+        drop_last=True,
+        num_workers=opt.load_num_worers
+    )
 
     def training_1_iter(data):
       assert type(data) is list
@@ -274,7 +298,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
         img2 = torch.autograd.Variable(img2)
 
       mods = [str(d['mod']['str']) for d in data]
-    #   mods = [t.decode('utf-8') for t in mods]
+      # mods = [t.decode('utf-8') for t in mods]
       mods = [t for t in mods]
 
       # compute loss
@@ -310,6 +334,50 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
       total_loss.backward()
       optimizer.step()
 
+    def compute_loss_testset(data):
+      assert type(data) is list
+      img1 = np.stack([d['source_img_data'] for d in data])
+      img1 = torch.from_numpy(img1).float()
+
+      if torch.cuda.is_available():
+        img1 = torch.autograd.Variable(img1).cuda()
+      else:
+        img1 = torch.autograd.Variable(img1)
+
+      img2 = np.stack([d['target_img_data'] for d in data])
+      img2 = torch.from_numpy(img2).float()
+
+      if torch.cuda.is_available():
+        img2 = torch.autograd.Variable(img2).cuda()
+      else:
+        img2 = torch.autograd.Variable(img2)
+      
+      mods = [str(d['mod']['str']) for d in data]
+      # mods = [t.decode('utf-8') for t in mods]
+      mods = [t for t in mods]
+
+      # compute loss
+      losses = []
+      if opt.loss == 'soft_triplet':
+        loss_value = model.compute_loss(
+            img1, mods, img2, soft_triplet_loss=True)
+      elif opt.loss == 'batch_based_classification':
+        loss_value = model.compute_loss(
+            img1, mods, img2, soft_triplet_loss=False)
+      else:
+        print('Invalid loss function', opt.loss)
+        sys.exit()
+      loss_name = opt.loss + " on testset"
+      loss_weight = 1.0
+      losses += [(loss_name, loss_weight, loss_value)]
+      
+      # track losses
+      for loss_name, loss_weight, loss_value in losses:
+        if loss_name not in losses_tracking:
+          losses_tracking[loss_name] = []
+        losses_tracking[loss_name].append(float(loss_value))
+      
+
     for data in tqdm(trainloader, desc='Training for epoch ' + str(epoch)):
       it += 1
       training_1_iter(data)
@@ -318,6 +386,9 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
       if it >= opt.learning_rate_decay_frequency and it % opt.learning_rate_decay_frequency == 0:
         for g in optimizer.param_groups:
           g['lr'] *= 0.1
+    
+    for data in tqdm(testloader, desc='Testing for epoch ' + str(epoch)):
+      compute_loss_testset(data)
 
   print('Finished training')
 
