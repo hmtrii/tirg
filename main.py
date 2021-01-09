@@ -329,9 +329,16 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
       optimizer.step()
 
     def compute_loss_testset(t):
-      img1 = [testset.get_img(t['source_img_id'])]
+      transform=torchvision.transforms.Compose([
+            torchvision.transforms.Resize(224),
+            torchvision.transforms.CenterCrop(224),
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize([0.485, 0.456, 0.406],
+                                             [0.229, 0.224, 0.225])
+      ]
+      img1 = [transform(testset.get_img(t['source_img_id']))]
       mod = [t['mod']['str']]
-      img2 = [testset.get_img(t['target_img_id'])]
+      img2 = [transform(testset.get_img(t['target_img_id']))]
       if torch.cuda.is_available():
         img1 = torch.autograd.Variable(img1).cuda()
         img2 = torch.autograd.Variable(img2).cuda()
@@ -369,7 +376,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
         for g in optimizer.param_groups:
           g['lr'] *= 0.1
     
-    for t in tqdm(testset.get_test_queries()[:3000], decs='Testing for epoch ' + str(epoch)):
+    for t in tqdm(testset.get_test_queries()[:3000], desc='Testing for epoch ' + str(epoch)):
       compute_loss_testset(t)
 
   print('Finished training')
