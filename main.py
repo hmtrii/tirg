@@ -215,6 +215,8 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
   it = 0
   epoch = -1
   tic = time.time()
+  best_test_loss = 9999
+  count_early_stopping = 0
   while it < opt.num_iters:
     epoch += 1
 
@@ -224,8 +226,6 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     tic = time.time()
     train_loss = 0
     test_loss = 0
-    best_test_loss = 9999
-    count_early_stopping = 0
     total_training_loss = 0
     for loss_name in losses_tracking:
       if loss_name == opt.loss:
