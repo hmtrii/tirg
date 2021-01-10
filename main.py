@@ -232,7 +232,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
         train_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
         print('    Loss', loss_name, round(train_loss, 4))
       elif loss_name == "soft_triplet on testset":
-        test_loss = np.mean(losses_tracking[loss_name])
+        test_loss = np.mean(losses_tracking[loss_name][-1500:])
         print('    Loss', loss_name, round(test_loss, 4))
       elif loss_name == "total training loss":
         total_training_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
@@ -276,6 +276,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
       },
                   logger.file_writer.get_logdir() + '/best_checkpoint.pth')
       count_early_stopping = 0
+      best_test_loss = test_loss
     else:
       count_early_stopping += 1
     
@@ -349,9 +350,11 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
       optimizer.step()
 
     def compute_loss_testset(data):
-      img1 = torch.stack([testset.get_img(d['source_img_id']) for d in data]).float()
+      img1 = np.stack([testset.get_img(d['source_img_id']) for d in data])
+      img1 = torch.from_numpy(img1).float()
       mods = [str(d['mod']['str']) for d in data]
-      img2 = torch.stack([testset.get_img(d['target_img_id']) for d in data]).float()
+      img2 = np.stack([testset.get_img(d['target_img_id']) for d in data])
+      img2 = torch.from_numpy(img2).float()
       if torch.cuda.is_available():
         img1 = torch.autograd.Variable(img1).cuda()
         img2 = torch.autograd.Variable(img2).cuda()
