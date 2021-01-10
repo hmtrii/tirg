@@ -228,10 +228,10 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     count_early_stopping = 0
     total_training_loss = 0
     for loss_name in losses_tracking:
-      if loss_name == "soft_triplet":
+      if loss_name == opt.loss:
         train_loss = np.mean(losses_tracking[loss_name][-len(trainloader):])
         print('    Loss', loss_name, round(train_loss, 4))
-      elif loss_name == "soft_triplet on testset":
+      elif loss_name == opt.loss + " on testset":
         test_loss = np.mean(losses_tracking[loss_name][-1500:])
         print('    Loss', loss_name, round(test_loss, 4))
       elif loss_name == "total training loss":
