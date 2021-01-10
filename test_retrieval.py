@@ -22,7 +22,7 @@ from tqdm import tqdm as tqdm
 def test(opt, model, testset):
   """Tests a model over the given testset."""
   model.eval()
-  test_queries = testset.get_test_queries()
+  test_queries = testset.get_test_queries()[:3000]
 
   all_imgs = []
   all_captions = []
@@ -115,7 +115,7 @@ def test(opt, model, testset):
     all_imgs[i, :] /= np.linalg.norm(all_imgs[i, :])
 
   # match test queries to target images, get nearest neighbors
-  sims = all_queries[:3000].dot(all_imgs.T)
+  sims = all_queries.dot(all_imgs.T)
   
   if test_queries:
     for i, t in enumerate(test_queries):
