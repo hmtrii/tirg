@@ -126,6 +126,3 @@ if __name__ == "__main__":
 			spatial_search = pkl.pkl_load("./pkl/normalized_all_imgs_feature.pkl")
 		retriveve_custom_query(query_img_raw, query_text, query_feature, spatial_search, testset, model)
 	
-	
-
-	

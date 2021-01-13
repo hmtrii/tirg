@@ -280,7 +280,7 @@ def train_loop(opt, logger, trainset, testset, model, optimizer):
     else:
       count_early_stopping += 1
     
-    if count_early_stopping >= 3:
+    if count_early_stopping >= 5:
       print("Eearly stopping")
       break
 
