@@ -1,6 +1,11 @@
 # Composing Text and Image for Image Retrieval
 Project at Multimedia Information Retrieval Course
 
+***Members:***
+- HUỲNH MINH TRÍ - MSSV: 18520176
+- ĐỒNG QUỐC TUẤN - MSSV: 18520185
+- NGUYỄN PHÚC ĐẠT - MSSV: 18520573
+
 # Introduction
 Our project is an attempt to use TIRG method with Fashion200k dataset.
 
@@ -9,6 +14,8 @@ This repository is forked from [TIRG](https://github.com/google/tirg).
 We have added LSH(Locality Sensitive Hashing) to impove speed retrieval.
 
 [Presetation](https://docs.google.com/presentation/d/1Ga_terlOKyy3bl4hNvTKnTnNhqMD2kNOieVN40JrBqQ/edit#slide=id.gb1a04fa9d2_1_28)
+
+[Report](https://docs.google.com/document/d/19qtAYDJekOzBxTri0AV2bpXdMcxdHUXYewyqxEvOv7E/edit?usp=sharing)
 
 # Implementation
 
@@ -68,4 +75,4 @@ python main.py --dataset=fashion200k --dataset_path=./Fashion200k \
 
 ## Retrieve an example
 
-![Example](images/retrieve_example.png)
+![Example](images/Retrieval_example.png)
